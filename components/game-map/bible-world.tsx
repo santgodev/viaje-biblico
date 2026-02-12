@@ -2,9 +2,10 @@
 
 import { useState, useRef, useEffect } from "react";
 import { motion, useMotionValue, useTransform, AnimatePresence } from "framer-motion";
-import { Stage, bibleData, Book } from "@/lib/bible-data";
-import { Maximize2, X, BookOpen, Scroll, Map as MapIcon, Info, HelpCircle, Trophy, Layers } from "lucide-react";
+import { Stage, bibleData, Book, Character } from "@/lib/bible-data";
+import { Maximize2, X, BookOpen, Scroll, Map as MapIcon, Info, HelpCircle, Trophy, Layers, ChevronRight, Users } from "lucide-react";
 import { TrialsMenu } from "./trials-menu";
+import { CharactersMenu } from "./characters-menu";
 
 // --- Game Map Constants ---
 const MAP_WIDTH = 3000;
@@ -31,6 +32,7 @@ const REGIONS: Record<string, { x: number; y: number; scale: number; icon: strin
 export function BibleWorld() {
     const [selectedStage, setSelectedStage] = useState<Stage | null>(null);
     const [selectedBook, setSelectedBook] = useState<Book | null>(null);
+    const [selectedStageCharacters, setSelectedStageCharacters] = useState<Stage | null>(null);
     const [showGenealogy, setShowGenealogy] = useState(false);
     const [showTrials, setShowTrials] = useState(false);
 
@@ -127,6 +129,28 @@ export function BibleWorld() {
                                     />
                                 </div>
 
+                                <motion.div
+                                    className="absolute -right-12 top-1/2 -translate-y-1/2 z-20 flex items-center group/genealogy"
+                                >
+                                    <motion.button
+                                        className="p-2.5 bg-stone-900 border border-amber-900/40 rounded-full shadow-2xl hover:bg-amber-900 hover:border-amber-500 transition-all flex items-center justify-center"
+                                        initial={{ opacity: 0, x: -10 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        whileHover={{ scale: 1.1 }}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            setSelectedStageCharacters(stage);
+                                        }}
+                                    >
+                                        <Users className="w-3.5 h-3.5 text-amber-500 group-hover/genealogy:text-amber-100" />
+                                    </motion.button>
+
+                                    {/* Tooltip-like label */}
+                                    <span className="ml-2 px-2 py-1 bg-black/80 border border-amber-900/20 rounded text-[8px] font-bold text-amber-500/80 uppercase tracking-widest opacity-0 group-hover/genealogy:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+                                        Linajes
+                                    </span>
+                                </motion.div>
+
                                 {/* Medieval-style Label */}
                                 <div className="mt-4 px-4 py-1.5 bg-[#1c1917]/90 backdrop-blur-md rounded-sm border border-amber-900/30 text-xs md:text-sm font-bold tracking-[0.2em] uppercase text-amber-200/80 shadow-2xl group-hover:text-amber-100 group-hover:border-amber-500/40 transition-all">
                                     {stage.name}
@@ -201,6 +225,16 @@ export function BibleWorld() {
             {/* --- Trials Modal --- */}
             <AnimatePresence>
                 {showTrials && <TrialsMenu onClose={() => setShowTrials(false)} />}
+            </AnimatePresence>
+
+            {/* --- Characters/Genealogy Modal --- */}
+            <AnimatePresence>
+                {selectedStageCharacters && (
+                    <CharactersMenu
+                        stage={selectedStageCharacters}
+                        onClose={() => setSelectedStageCharacters(null)}
+                    />
+                )}
             </AnimatePresence>
 
             {/* --- Genealogy Modal --- */}
@@ -386,9 +420,7 @@ export function BibleWorld() {
                                         <div className="text-xs font-mono text-stone-500 mb-2">{book.period}</div>
                                         <h4 className="text-lg font-bold text-stone-100 mb-1 group-hover:text-amber-200 transition-colors">{book.name}</h4>
                                         <div className="h-0.5 w-8 bg-stone-700 mb-3 group-hover:bg-amber-500/50 transition-colors" />
-                                        <p className="text-xs text-stone-400 line-clamp-2 leading-relaxed">
-                                            {book.theme}
-                                        </p>
+                                        <p className="text-sm opacity-80 mt-1 line-clamp-1 italic">{book.theme}</p>
                                     </motion.div>
                                 ))}
                             </div>
@@ -436,12 +468,10 @@ export function BibleWorld() {
 
                             {/* Item Content */}
                             <div className="p-6 space-y-6 max-h-[60vh] overflow-y-auto">
-                                <div>
-                                    <div className="text-xs font-bold uppercase tracking-widest text-stone-600 mb-2">Descripción</div>
-                                    <p className="text-stone-300 text-sm leading-relaxed italic">
-                                        {bookDataToRichText(selectedBook)}
-                                    </p>
-                                </div>
+                                <div className="text-xs font-bold uppercase tracking-widest text-stone-600 mb-2">Descripción</div>
+                                <p className="text-stone-300 text-sm leading-relaxed italic">
+                                    {selectedBook.description}
+                                </p>
 
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="bg-stone-900/50 p-3 rounded border border-stone-800">
@@ -472,8 +502,4 @@ export function BibleWorld() {
     );
 }
 
-// Helper to expand description if needed, currently using theme as base
-function bookDataToRichText(book: Book) {
-    // This could be expanded in the data file to include a longer 'lore' description
-    return `Un antiguo manuscrito del ${book.testament === 'Old' ? 'Antiguo Testamento' : 'Nuevo Testamento'}, atribuido a ${book.author}. Este texto es fundamental para comprender la etapa de ${book.stage}, abordando temas profundos de ${book.theme.toLowerCase()}.`;
-}
+// Helper removed as data is now rich in bible-data.ts

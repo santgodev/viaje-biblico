@@ -47,6 +47,9 @@ export function BookCard({ book, color }: BookCardProps) {
                         exit={{ opacity: 0, height: 0 }}
                         className="mt-4 space-y-3 border-t pt-3 border-black/10 dark:border-white/10"
                     >
+                        <p className="text-sm opacity-90 leading-relaxed mb-4 italic">
+                            {book.description}
+                        </p>
                         <div className="grid grid-cols-2 gap-2 text-sm">
                             <div className="flex items-center gap-2 opacity-80">
                                 <User className="h-4 w-4" />
